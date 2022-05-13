@@ -19,13 +19,15 @@ public static class ToDoRequests
         app.MapPost("todos", ToDoRequests.Create)
             .Produces<ToDo>(StatusCodes.Status201Created)
             .Accepts<ToDo>("application/json")
-            .WithTags("To Dos");
+            .WithTags("To Dos")
+            .WithValidator<ToDo>();
 
         app.MapPut("todos/{id}", ToDoRequests.Update)
             .Produces<ToDo>(StatusCodes.Status204NoContent)
             .Produces<ToDo>(StatusCodes.Status404NotFound)
             .Accepts<ToDo>("application/json")
-            .WithTags("To Dos");
+            .WithTags("To Dos")
+            .WithValidator<ToDo>();
 
         app.MapDelete("todos/{id}", ToDoRequests.Delete)
             .Produces<ToDo>(StatusCodes.Status204NoContent)
@@ -56,31 +58,16 @@ public static class ToDoRequests
         return Results.Ok(todos);
     }
 
-    public static IResult Create([FromServices] IToDoService service, [FromBody] ToDo toDo, IValidator<ToDo> validator)
+    public static IResult Create([FromServices] IToDoService service, [FromBody] ToDo toDo)
     {
-        var validationResult = validator.Validate(toDo);
-
-        if (!validationResult.IsValid)
-        {
-            return Results.BadRequest(validationResult.Errors);
-        }
-
-        //  if(validationResult == null)
 
         service.Create(toDo);
 
         return Results.Created($"/todos/{toDo.Id}", toDo);
     }
 
-    public static IResult Update([FromServices] IToDoService service, [FromRoute] Guid id, [FromBody] ToDo toDo, IValidator<ToDo> validator)
+    public static IResult Update([FromServices] IToDoService service, [FromRoute] Guid id, [FromBody] ToDo toDo)
     {
-        var validationResult = validator.Validate(toDo);
-
-        if (!validationResult.IsValid)
-        {
-            return Results.BadRequest(validationResult.Errors);
-        }
-
 
         var existingToDo = service.GetById(id);
 
