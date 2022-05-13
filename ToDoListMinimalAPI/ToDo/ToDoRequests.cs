@@ -2,15 +2,17 @@
 
 namespace ToDoListMinimalAPI;
 
-public class ToDoRequests
+public static class ToDoRequests
 {
-    public static void RegisterEndpoints(WebApplication app)
+    public static WebApplication RegisterEndpoints(this WebApplication app)
     {
         app.MapGet("todos", ToDoRequests.GetAll);
         app.MapGet("todos/{id}", ToDoRequests.GetById);
         app.MapPost("todos", ToDoRequests.Create);
         app.MapPut("todos/{id}", ToDoRequests.Update);
         app.MapDelete("todos/{id}", ToDoRequests.Delete);
+
+        return app;
     }
 
     public static IResult GetAll([FromServices] IToDoService service)
