@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ToDoListMinimalAPI;
 
@@ -55,15 +56,32 @@ public static class ToDoRequests
         return Results.Ok(todos);
     }
 
-    public static IResult Create([FromServices] IToDoService service, [FromBody] ToDo toDo)
+    public static IResult Create([FromServices] IToDoService service, [FromBody] ToDo toDo, IValidator<ToDo> validator)
     {
+        var validationResult = validator.Validate(toDo);
+
+        if (!validationResult.IsValid)
+        {
+            return Results.BadRequest(validationResult.Errors);
+        }
+
+        //  if(validationResult == null)
+
         service.Create(toDo);
 
         return Results.Created($"/todos/{toDo.Id}", toDo);
     }
 
-    public static IResult Update([FromServices] IToDoService service, [FromRoute] Guid id, [FromBody] ToDo toDo)
+    public static IResult Update([FromServices] IToDoService service, [FromRoute] Guid id, [FromBody] ToDo toDo, IValidator<ToDo> validator)
     {
+        var validationResult = validator.Validate(toDo);
+
+        if (!validationResult.IsValid)
+        {
+            return Results.BadRequest(validationResult.Errors);
+        }
+
+
         var existingToDo = service.GetById(id);
 
         if (existingToDo == null)
